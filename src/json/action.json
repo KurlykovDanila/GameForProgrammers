@@ -1,0 +1,14 @@
+{
+    "actions": [
+        {
+            "action": "Move",
+            "direction": {
+                "direction": "Right"
+            },
+            "range": 2
+        },
+        {
+            "action": "Reload"
+        }
+    ]
+}
