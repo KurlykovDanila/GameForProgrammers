@@ -1,0 +1,30 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Client Api
+      run: cargo build --verbose ./game_client_api
+    - name: Run tests Client Api
+      run: cargo test --verbose ./game_client_api
+    - name: Build Core
+      run: cargo build --verbose ./core
+    - name: Run tests Core
+      run: cargo test --verbose ./core
+    - name: Build Server
+      run: cargo build --verbose ./server
+    - name: Run tests Server
+      run: cargo test --verbose ./server
