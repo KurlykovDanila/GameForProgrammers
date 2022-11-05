@@ -14,7 +14,7 @@ pub trait Movable {
 }
 
 pub trait WithCharacter {
-    fn character(&self) -> Character;
+    fn character(&self) -> &Character;
 }
 
 pub trait Attack {

@@ -1,8 +1,17 @@
-use std::{
-    net::TcpStream,
-};
+use std::net::TcpStream;
 
 use tungstenite::WebSocket;
+
+pub trait DynClient: WithHero + WithWS {
+    fn add_hero_id(&mut self, hero_id: u8);
+}
+
+
+impl DynClient for Client {
+    fn add_hero_id(&mut self, hero_id: u8) {
+        self.hero_id = Some(hero_id);
+    }
+}
 
 pub struct Client {
     ws: WebSocket<TcpStream>,
@@ -12,10 +21,6 @@ pub struct Client {
 impl Client {
     pub fn new(ws: WebSocket<TcpStream>) -> Self {
         Self { ws, hero_id: None }
-    }
-
-    pub fn add_hero(&mut self, hero_id: u8) {
-        self.hero_id = Some(hero_id);
     }
 }
 

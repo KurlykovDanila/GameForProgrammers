@@ -2,9 +2,7 @@
     "actions": [
         {
             "action": "Move",
-            "direction": {
-                "direction": "Right"
-            },
+            "direction": "Right",
             "range": 2
         },
         {

@@ -16,16 +16,14 @@ cargo run
 
 ## Action example JSON
 
-Communication with the server takes place using JSON, you connect to the server using a websocket and as soon as the server signals the start of the game, you send messages in the form:
+ Communication with the server takes place using JSON, you connect to the server using a websocket and as soon as the server signals the start of the game, you send messages in the form:
 
 ```json
 {
     "actions": [
         {
             "action": "Move",
-            "direction": {
-                "direction": "Right"
-            },
+            "direction": "Right",
             "range": 2
         },
         {

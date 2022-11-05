@@ -1,9 +1,8 @@
-use std::{any::Any, fmt::Display};
+use std::fmt::Display;
 
 use super::{
     character::{Bullet, Character, CharacterInfo, Gun, Health},
     direction::Direction,
-    map::Map,
     pos::Pos,
     traits::{Attack, Movable, WithCharacter, WithHealth, WithId},
 };
@@ -101,8 +100,8 @@ impl WithId for Player {
 }
 
 impl WithCharacter for Player {
-    fn character(&self) -> Character {
-        self.character.clone()
+    fn character(&self) -> &Character {
+        &self.character
     }
 }
 
@@ -114,9 +113,9 @@ pub struct PlayerInfo {
 }
 
 impl PlayerInfo {
-    pub fn new(player: &Player) -> Self {
+    pub fn new(character: &Character) -> Self {
         Self {
-            character: CharacterInfo::new(&player.character()),
+            character: CharacterInfo::new(character),
         }
     }
 

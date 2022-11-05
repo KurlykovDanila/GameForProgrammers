@@ -3,23 +3,78 @@ use std::fmt::Display;
 use super::{
     character::Bullet,
     map::{CanMove, Cell, Map},
-    player::{Action, Player, PlayerInfo},
-    traits::{Attack, Movable, WithHealth, WithId},
+    player::{Action, DynPlayer, PlayerInfo},
+    traits::Movable,
 };
 
 use ez_colorize::ColorizeDisplay;
 use serde::Serialize;
 
-pub struct Game<const N: usize> {
-    state: GameState,
-    map: Map,
-    players: Vec<Player>,
-    time_limit: u16,
-    bullets: Vec<Bullet>,
+pub trait LikeGame {
+    fn update(&mut self, actions: Vec<Vec<Action>>);
+    fn validate_actions(&self, actions: &mut Vec<Action>);
+    fn state(&self) -> &GameState;
+    fn get_actions_count(&self) -> usize;
 }
 
-impl<const N: usize> Game<N> {
-    pub fn new(map: Map, mut players: Vec<Player>, time_limit: u16) -> Self {
+impl LikeGame for Game {
+    fn validate_actions(&self, actions: &mut Vec<Action>) {
+        if actions.len() == self.actions_count {
+        } else if actions.len() < self.actions_count {
+            for _ in actions.len()..self.actions_count {
+                actions.push(Action::Nothing);
+            }
+        } else {
+            for _ in self.actions_count..actions.len() {
+                actions.pop();
+            }
+        }
+    }
+
+    fn get_actions_count(&self) -> usize {
+        self.actions_count
+    }
+
+    fn state(&self) -> &GameState {
+        &self.state
+    }
+
+    fn update(&mut self, actions: Vec<Vec<Action>>) {
+        match self.state {
+            GameState::TimeIsOver { .. } => return,
+            GameState::End { .. } => return,
+            GameState::Continue { .. } | GameState::NotStarted { .. } => {
+                for action_ind in 0..self.actions_count {
+                    for pl_ind in 0..self.players.len() {
+                        self.execute_action(pl_ind, actions[pl_ind][action_ind]);
+                    }
+                }
+                self.bullet_update();
+                self.time_update();
+
+                self.game_state_update();
+            }
+            GameState::Empty => return,
+        }
+    }
+}
+
+pub struct Game {
+    state: GameState,
+    map: Map,
+    players: Vec<Box<dyn DynPlayer>>,
+    time_limit: u16,
+    bullets: Vec<Bullet>,
+    actions_count: usize,
+}
+
+impl Game {
+    pub fn new(
+        map: Map,
+        mut players: Vec<Box<dyn DynPlayer>>,
+        time_limit: u16,
+        actions_count: usize,
+    ) -> Self {
         players.sort_by(|f, s| f.get_id().cmp(&s.get_id()));
         let mut game = Self {
             state: GameState::Empty,
@@ -27,41 +82,12 @@ impl<const N: usize> Game<N> {
             players,
             time_limit,
             bullets: Vec::new(),
+            actions_count,
         };
         game.state = GameState::NotStarted {
             info: GameInfo::new(&game),
         };
         game
-    }
-
-    pub fn state(&self) -> &GameState {
-        &self.state
-    }
-
-    pub fn validate_actions(&self, actions: &mut Vec<Action>) {
-        if actions.len() == N {
-        } else if actions.len() < N {
-            for _ in actions.len()..N {
-                actions.push(Action::Nothing);
-            }
-        } else {
-            for _ in N..actions.len() {
-                actions.pop();
-            }
-        }
-    }
-
-    pub fn player_state(&self, id: u8) -> PlayerInfo {
-        PlayerInfo::new(&self.players[self.get_player_by_id(id).unwrap()])
-    }
-
-    fn get_player_by_id(&self, id: u8) -> Option<usize> {
-        for (ind, player) in self.players.iter().enumerate() {
-            if player.get_id() == id {
-                return Some(ind);
-            }
-        }
-        return None;
     }
 
     fn check_time_limit_over(&mut self) {
@@ -84,25 +110,6 @@ impl<const N: usize> Game<N> {
         }
         self.have_winner();
         self.check_time_limit_over();
-    }
-
-    pub fn update(&mut self, actions: Vec<Vec<Action>>) {
-        match self.state {
-            GameState::TimeIsOver { .. } => return,
-            GameState::End { .. } => return,
-            GameState::Continue { .. } | GameState::NotStarted { .. } => {
-                for action_ind in 0..N {
-                    for pl_ind in 0..self.players.len() {
-                        self.execute_action(pl_ind, actions[pl_ind][action_ind]);
-                    }
-                }
-                self.bullet_update();
-                self.time_update();
-
-                self.game_state_update();
-            }
-            GameState::Empty => return,
-        }
     }
 
     fn alives(&self) -> Vec<u8> {
@@ -215,11 +222,50 @@ impl Display for GameState {
     }
 }
 
+#[derive(Default)]
+pub struct GameBuilder {
+    map_size: Option<u8>,
+    players: Vec<Box<dyn DynPlayer>>,
+    time_limit: Option<u16>,
+    actions_count: Option<usize>,
+}
+
+impl GameBuilder {
+    pub fn add_players(mut self, players: Vec<Box<dyn DynPlayer>>) -> Self {
+        self.players = players;
+        self
+    }
+
+    pub fn add_time_limit(mut self, limit: u16) -> Self {
+        self.time_limit = Some(limit);
+        self
+    }
+
+    pub fn add_actions_count(mut self, actions: usize) -> Self {
+        self.actions_count = Some(actions);
+        self
+    }
+
+    pub fn add_map_size(mut self, map_size: u8) -> Self {
+        self.map_size = Some(map_size);
+        self
+    }
+
+    pub fn build(self) -> Box<dyn LikeGame> {
+        Box::new(Game::new(
+            Map::new_empty(self.map_size.unwrap_or(5)),
+            self.players,
+            self.time_limit.unwrap_or(1000),
+            self.actions_count.unwrap_or(2),
+        ))
+    }
+}
+
 impl GameInfo {
-    fn new<const N: usize>(game: &Game<N>) -> Self {
+    fn new(game: &Game) -> Self {
         let mut players = Vec::new();
         for pl in game.players.iter() {
-            let mut info = PlayerInfo::new(pl);
+            let mut info = PlayerInfo::new(pl.character());
             if let Cell::Bushes = game.map.get_cell(pl.get_position()) {
                 info.without_pos();
             }

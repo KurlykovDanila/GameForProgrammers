@@ -1,7 +1,7 @@
-pub mod direction;
 pub mod character;
+pub mod direction;
 pub mod game;
-pub mod map;
-pub mod traits;
+mod map;
 pub mod player;
 pub mod pos;
+pub mod traits;

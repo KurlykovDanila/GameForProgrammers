@@ -1,0 +1,58 @@
+{
+    "map": {
+        "field": [
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty",
+            "Empty"
+        ],
+        "size": 5
+    },
+    "players": [
+        {
+            "character": {
+                "health": 100,
+                "gun_reloading_await": 0,
+                "bullet_damage": 20,
+                "bullet_range": 5,
+                "pos": {
+                    "x": 1,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "character": {
+                "health": 100,
+                "gun_reloading_await": 0,
+                "bullet_damage": 20,
+                "bullet_range": 5,
+                "pos": {
+                    "x": 2,
+                    "y": 0
+                }
+            }
+        }
+    ]
+}

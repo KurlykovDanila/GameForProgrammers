@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use super::traits::IntoBytes;
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
-#[serde(tag = "direction")]
 pub enum Direction {
     Top,
     Bottom,

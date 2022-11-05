@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use ez_colorize::ColorizeDisplay;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::direction::Direction;
 
