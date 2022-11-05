@@ -17,14 +17,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build Client Api
-      run: cargo build --verbose --manifest-path ./game_client_api
+      run: cargo build --verbose --manifest-path ./game_client_api/Cargo.toml
     - name: Run tests Client Api
-      run: cargo test --verbose --manifest-path ./game_client_api
+      run: cargo test --verbose --manifest-path ./game_client_api/Cargo.toml
     - name: Build Core
-      run: cargo build --verbose --manifest-path ./core
+      run: cargo build --verbose --manifest-path ./core/Cargo.toml
     - name: Run tests Core
-      run: cargo test --verbose --manifest-path ./core
+      run: cargo test --verbose --manifest-path ./core/Cargo.toml
     - name: Build Server
-      run: cargo build --verbose --manifest-path ./server
+      run: cargo build --verbose --manifest-path ./server/Cargo.toml
     - name: Run tests Server
-      run: cargo test --verbose --manifest-path ./server
+      run: cargo test --verbose --manifest-path ./server/Cargo.toml
